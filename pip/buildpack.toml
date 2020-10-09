@@ -1,0 +1,9 @@
+api = "0.2"
+
+[buildpack]
+id = "org.toolforge.buildpacks.pip"
+version = "0.0.1"
+name = "pip buildpack"
+
+[[stacks]]
+id = "org.toolforge.buildpacks.stack.buster0"

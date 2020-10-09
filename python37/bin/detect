@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eo pipefail
+
+grep -q 'type: python3.7' service.template || exit 100
+echo "Python 3.7 buildpack"
+
+cat > "$2" <<TOML
+[[provides]]
+name = "python"
+
+[[requires]]
+name = "python"
+version = "3.7"
+
+[[provides]]
+name = "pip"
+
+[[requires]]
+name = "pip"
+
+[[provides]]
+name = "virtualenv"
+
+[[requires]]
+name = "virtualenv"
+
+TOML
+

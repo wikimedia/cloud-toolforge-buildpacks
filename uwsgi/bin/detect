@@ -1,0 +1,15 @@
+#!/bin/bash
+set -eo pipefail
+
+# This is run unconditionally
+echo "uwsgi buildpack"
+
+cat > "$2" <<TOML
+[[requires]]
+name = "python"
+
+[[requires]]
+name = "virtualenv"
+
+TOML
+

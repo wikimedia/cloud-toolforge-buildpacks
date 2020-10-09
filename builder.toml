@@ -1,0 +1,34 @@
+[[buildpacks]]
+id = "org.toolforge.buildpacks.python37"
+version = "0.0.1"
+uri = "./python37"
+
+[[buildpacks]]
+id = "org.toolforge.buildpacks.pip"
+version = "0.0.1"
+uri = "./pip"
+
+[[buildpacks]]
+id = "org.toolforge.buildpacks.uwsgi"
+version = "0.0.1"
+uri = "./uwsgi"
+
+[[order]]
+[[order.group]]
+id = "org.toolforge.buildpacks.python37"
+version = "0.0.1"
+optional = true
+
+[[order.group]]
+id = "org.toolforge.buildpacks.pip"
+version = "0.0.1"
+optional = true
+
+[[order.group]]
+id = "org.toolforge.buildpacks.uwsgi"
+version = "0.0.1"
+
+[stack]
+id = "org.toolforge.buildpacks.stack.buster0"
+run-image = "docker-registry.tools.wmflabs.org/toolforge-buster0-run:latest"
+build-image = "docker-registry.tools.wmflabs.org/toolforge-buster0-build:latest"

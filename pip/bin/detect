@@ -1,0 +1,17 @@
+#!/bin/bash
+set -eo pipefail
+
+if [[ ! -f requirements.txt ]]; then
+    exit 100
+fi
+echo "pip buildpack"
+
+cat > "$2" <<TOML
+[[requires]]
+name = "python"
+
+[[requires]]
+name = "virtualenv"
+
+TOML
+

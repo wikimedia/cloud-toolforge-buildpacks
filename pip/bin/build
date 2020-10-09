@@ -1,0 +1,23 @@
+#!/bin/bash
+set -eo pipefail
+
+echo "---> pip Buildpack"
+
+# Enable local apt
+# shellcheck disable=SC1091
+source ./export
+
+LAYERS_DIR="$1"
+PIP_LAYER="$LAYERS_DIR/pip"
+
+echo "----> Creating virtualenv"
+virtualenv "$PIP_LAYER/venv"
+"$PIP_LAYER/venv/bin/pip" install --upgrade pip --no-cache-dir
+echo "----> Installing from requirements.txt"
+"$PIP_LAYER/venv/bin/pip" install -r requirements.txt --no-cache-dir
+
+cat > "$PIP_LAYER.toml" <<TOML
+launch = true
+cache = true
+TOML
+
