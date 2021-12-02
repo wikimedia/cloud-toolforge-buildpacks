@@ -2,16 +2,17 @@
 set -eo pipefail
 
 if [[ ! -f requirements.txt ]]; then
+    echo "No requirements.txt file found, skipping pip buildpack."
     exit 100
 fi
 echo "pip buildpack"
 
 cat > "$2" <<TOML
-[[requires]]
-name = "python"
+[[provides]]
+name = "pip"
 
 [[requires]]
-name = "virtualenv"
+name = "python"
 
 TOML
 

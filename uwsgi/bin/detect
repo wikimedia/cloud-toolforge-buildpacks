@@ -6,10 +6,6 @@ echo "uwsgi buildpack"
 
 cat > "$2" <<TOML
 [[requires]]
-name = "python"
-
-[[requires]]
-name = "virtualenv"
+name = "pip"
 
 TOML
-

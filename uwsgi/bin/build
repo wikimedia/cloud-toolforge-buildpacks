@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 
 echo "---> uwsgi Buildpack"
 
@@ -8,39 +8,37 @@ echo "---> uwsgi Buildpack"
 source ./export
 
 LAYERS_DIR="$1"
-UWSGI_LAYER="$LAYERS_DIR/uwsgi"
+PIP_LAYER="${LAYERS_DIR%/*}/org.toolforge.buildpacks.pip/pip"
 
 echo "----> Installing uwsgi"
-# Create a virtualenv and install uwsgi
-virtualenv "$UWSGI_LAYER/venv"
-"$UWSGI_LAYER/venv/bin/pip" install --upgrade pip --no-cache-dir
-"$UWSGI_LAYER/venv/bin/pip" install uwsgi==2.0.18 --no-cache-dir
+"$PIP_LAYER/venv/bin/pip" install uwsgi==2.0.18 --no-cache-dir
 
 echo "----> Configuring uwsgi web launcher"
 
-# The pip step is optional
-if [ -d "/layers/org.toolforge.buildpacks.pip/pip/venv" ]; then
-    VENV_CMD="--venv /layers/org.toolforge.buildpacks.pip/pip/venv"
-else
-    VENV_CMD=""
-fi
+VENV_CMD="--venv ${PIP_LAYER}/venv"
 
 # Allow local config overrides
-if [ -f "uwsgi.ini" ]; then
+if [[ -f "uwsgi.ini" ]]; then
     INI_CMD="--ini uwsgi.ini"
 else
     INI_CMD=""
 fi
 
-cat > "$UWSGI_LAYER.toml" <<TOML
-launch = true
-cache = true
-TOML
-
 # TODO: see if we can mount "app" rather than "app.py"
 cat >> "${LAYERS_DIR}/launch.toml" <<TOML
 [[processes]]
 type = "web"
-command = "source ./export && $UWSGI_LAYER/venv/bin/uwsgi --http-socket :8000 --callable app --manage-script-name --workers 4 --mount \"/=app.py\" --die-on-term --strict --master $VENV_CMD $INI_CMD"
+command = """\
+    source ./export \
+    && $PIP_LAYER/venv/bin/uwsgi \
+        --http-socket :8000 \
+        --callable app \
+        --manage-script-name \
+        --workers 4 \
+        --mount "/=app.py" \
+        --die-on-term \
+        --strict \
+        --master $VENV_CMD $INI_CMD\
+"""
 TOML
 

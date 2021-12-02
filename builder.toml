@@ -1,32 +1,32 @@
 [[buildpacks]]
 id = "org.toolforge.buildpacks.python37"
-version = "0.0.1"
+version = "0.0.2"
 uri = "./python37"
 
 [[buildpacks]]
 id = "org.toolforge.buildpacks.pip"
-version = "0.0.1"
+version = "0.0.2"
 uri = "./pip"
 
 [[buildpacks]]
 id = "org.toolforge.buildpacks.uwsgi"
-version = "0.0.1"
+version = "0.0.2"
 uri = "./uwsgi"
 
 [[order]]
 [[order.group]]
 id = "org.toolforge.buildpacks.python37"
-version = "0.0.1"
+version = "0.0.2"
 optional = true
 
 [[order.group]]
 id = "org.toolforge.buildpacks.pip"
-version = "0.0.1"
+version = "0.0.2"
 optional = true
 
 [[order.group]]
 id = "org.toolforge.buildpacks.uwsgi"
-version = "0.0.1"
+version = "0.0.2"
 
 [stack]
 id = "org.toolforge.buildpacks.stack.buster0"
