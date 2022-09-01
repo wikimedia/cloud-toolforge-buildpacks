@@ -1,17 +1,20 @@
 #!/bin/bash
-set -euo pipefail
+set -o pipefail
+set -o errexit
+set -o nounset
 
 echo "---> uwsgi Buildpack"
 
-# Enable local apt
+# This sets all env variables to point to the local apt installation
 # shellcheck disable=SC1091
-source ./export
+source ./export.run
+# shellcheck disable=SC1091
+source ./export.build
 
 LAYERS_DIR="$1"
 PIP_LAYER="${LAYERS_DIR%/*}/org.toolforge.buildpacks.pip/pip"
 
-echo "----> Installing uwsgi"
-"$PIP_LAYER/venv/bin/pip" install uwsgi==2.0.18 --no-cache-dir
+"$PIP_LAYER/venv/bin/pip" install uwsgi --no-cache-dir
 
 echo "----> Configuring uwsgi web launcher"
 
@@ -28,8 +31,10 @@ fi
 cat >> "${LAYERS_DIR}/launch.toml" <<TOML
 [[processes]]
 type = "web"
+default = true
+direct = false
 command = """\
-    source ./export \
+    source ./export.run \
     && $PIP_LAYER/venv/bin/uwsgi \
         --http-socket :8000 \
         --callable app \

@@ -1,9 +1,0 @@
-api = "0.2"
-
-[buildpack]
-id = "org.toolforge.buildpacks.python37"
-version = "0.0.2"
-name = "Python 3.7 buildpack"
-
-[[stacks]]
-id = "org.toolforge.buildpacks.stack.buster0"

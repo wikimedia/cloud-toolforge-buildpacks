@@ -1,0 +1,114 @@
+#!/bin/bash
+set -o pipefail
+set -o errexit
+set -o nounset
+
+echo "---> Python 3.9 Buildpack"
+
+LAYERS_DIR="$1"
+PYTHON_LAYER="$LAYERS_DIR/python"
+PYTHONDEV_LAYER="$LAYERS_DIR/pythondev"
+# We split the cache into a separate layer that isn't used at runtime
+APTCACHE_LAYER="$LAYERS_DIR/apt"
+
+
+setup_python_run_layer() {
+    echo "----> Installing python3"
+    cat > "$PYTHON_LAYER/Aptfile" <<EOP
+python3
+libpython3.9
+python3-distlib
+python3-filelock
+python3-pip
+python3-virtualenv
+EOP
+    /usr/bin/install-packages "$PYTHON_LAYER" "$APTCACHE_LAYER"
+    # save the run-only exported vars, from the profile so they append to existing vars instead of rewriting
+    # them
+    mv ./export ./export.run
+
+    # Add also the python dev libs to the build paths
+    python_libs_path=$PYTHON_LAYER/.apt/usr/lib/python3.9
+    cat >>./export.run <<EONV
+export CPATH="\${CPATH:+\$CPATH:}$python_libs_path"
+export CCPATH="\${CCPATH:+\$CCPATH:}$python_libs_path"
+export LD_LIBRARY_PATH="\${LD_LIBRARY_PATH:+\$LD_LIBRARY_PATH:}$python_libs_path"
+# needed for virtualenv
+export BUNDLE_FOLDER="$PYTHON_LAYER/.apt/usr/share/python-wheels"
+EONV
+    echo "Got run vars:"
+    echo "vvvvvvvvvvvvvvvvvvvvvvvvv"
+    cat ./export.run
+    echo "^^^^^^^^^^^^^^^^^^^^^^^^^"
+}
+
+setup_python_dev_layer() {
+    echo "----> Installing python3 dev (for building)"
+    cat > "$PYTHONDEV_LAYER/Aptfile" <<EOP
+python3-dev
+EOP
+    /usr/bin/install-packages "$PYTHONDEV_LAYER" "$APTCACHE_LAYER"
+    mv ./export ./export.build
+
+    # Add also the python dev libs to the build paths
+    python_libs_path=$PYTHONDEV_LAYER/.apt/usr/include/python3.9
+    cat >>./export.build <<EONV
+export CPATH="\${CPATH:+\$CPATH:}$python_libs_path"
+export CCPATH="\${CCPATH:+\$CCPATH:}$python_libs_path"
+export LD_LIBRARY_PATH="\${LD_LIBRARY_PATH:+\$LD_LIBRARY_PATH:}$python_libs_path"
+EONV
+    echo "Got build vars:"
+    echo "vvvvvvvvvvvvvvvvvvvvvvvvv"
+    cat ./export.build
+    echo "^^^^^^^^^^^^^^^^^^^^^^^^^"
+}
+
+fix_hardcoded_paths() {
+    # shellcheck source=/dev/null
+    source ./export.run
+
+    #Fix pip/virtualenv shebangs
+    sed -i -e 's|^#! */usr/bin/python3|#!/usr/bin/env python3|' \
+        "$(command -v virtualenv)" \
+        "$(command -v pip)"
+
+    #Fix BUNDLE_FOLDER for virtualenv
+    BUNDLE_FOLDER=$PYTHON_LAYER/.apt/usr/share/python-wheels
+    sed -i -e "s|/usr/share/python-wheels|$BUNDLE_FOLDER|" \
+        "$PYTHON_LAYER/.apt/usr/lib/python3/dist-packages/virtualenv/seed/wheels/embed/__init__.py"
+}
+
+
+main() {
+    mkdir -p "$APTCACHE_LAYER" "$PYTHON_LAYER" "$PYTHONDEV_LAYER"
+    setup_python_run_layer
+    setup_python_dev_layer
+    fix_hardcoded_paths
+
+    # For building and running
+    cat > "$PYTHON_LAYER.toml" <<TOML
+[types]
+launch = true
+cache = true
+build = true
+TOML
+
+    # Only there for building
+    cat > "$PYTHONDEV_LAYER.toml" <<TOML
+[types]
+launch = false
+cache = true
+build = true
+TOML
+
+    # Only there for building
+    cat > "$APTCACHE_LAYER.toml" <<TOML
+[types]
+launch = false
+cache = true
+build = true
+TOML
+}
+
+
+main "$@"

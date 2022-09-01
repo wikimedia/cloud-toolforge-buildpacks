@@ -1,9 +1,9 @@
-api = "0.2"
+api = "0.8"
 
 [buildpack]
 id = "org.toolforge.buildpacks.pip"
-version = "0.0.2"
+version = "0.0.3"
 name = "pip buildpack"
 
 [[stacks]]
-id = "org.toolforge.buildpacks.stack.buster0"
+id = "org.toolforge.buildpacks.stack.bullseye0"

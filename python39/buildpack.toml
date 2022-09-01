@@ -1,9 +1,9 @@
 api = "0.8"
 
 [buildpack]
-id = "org.toolforge.buildpacks.uwsgi"
+id = "org.toolforge.buildpacks.python39"
 version = "0.0.3"
-name = "uwsgi buildpack"
+name = "Python 3.9 buildpack"
 
 [[stacks]]
 id = "org.toolforge.buildpacks.stack.bullseye0"

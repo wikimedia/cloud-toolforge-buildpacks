@@ -1,35 +1,26 @@
 #!/bin/bash
-set -eo pipefail
+set -o pipefail
+set -o errexit
+set -o nounset
 
 echo "---> pip Buildpack"
 
-# Enable local apt
-# shellcheck disable=SC1091
-source ./export
+# This sets all env variables to point to the local apt installation
+# shellcheck source=/dev/null
+source ./export.run
 
 LAYERS_DIR="$1"
 PIP_LAYER="$LAYERS_DIR/pip"
 
-echo "----> Installing pip"
-# TODO: check if pip is cached before reinstalling it
-PIP_URL="https://raw.githubusercontent.com/pypa/get-pip/fa7dc83944936bf09a0e4cb5d5ec852c0d256599/get-pip.py"
-PIP_SHA256="6e0bb0a2c2533361d7f297ed547237caf1b7507f197835974c0dd7eba998c53c"
-curl "$PIP_URL" -o get-pip.py; \
-    echo "$PIP_SHA256 get-pip.py" | sha256sum --check --strict -; \
-    python3 get-pip.py --disable-pip-version-check --no-cache-dir && \
-    rm get-pip.py
-
-echo "----> Installing virtualenv"
-pip install virtualenv --no-cache-dir
-
 echo "----> Creating virtualenv"
-virtualenv "$PIP_LAYER/venv"
+virtualenv --python "$(command -v python3)" "$PIP_LAYER/venv"
 "$PIP_LAYER/venv/bin/pip" install --upgrade pip --no-cache-dir
 
 echo "----> Installing from requirements.txt"
 "$PIP_LAYER/venv/bin/pip" install -r requirements.txt --no-cache-dir
 
 cat > "$PIP_LAYER.toml" <<TOML
+[types]
 launch = true
 cache = true
 build = true

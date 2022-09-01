@@ -1,0 +1,15 @@
+#!/bin/bash
+set -eo pipefail
+
+if ! grep -q 'type: python39' service.template; then
+    echo "No line 'type: python39' found in the service.template file, skipping python39 buildpack."
+    exit 100
+fi
+echo "Python 3.9 buildpack"
+
+cat > "$2" <<TOML
+[[provides]]
+name = "python"
+
+TOML
+

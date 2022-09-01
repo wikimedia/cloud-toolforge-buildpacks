@@ -17,7 +17,7 @@ first.
 ./make.sh
 # Change directories to your tool
 cd ../my-cool-tool
-pack build my-cool-tool --builder toolforge-buster0-builder
+pack build my-cool-tool --builder toolforge-bullseye0-builder
 docker run my-cool-tool
 ```
 
@@ -31,7 +31,7 @@ If you want to debug why your app is not being built as you expect, enabling
 the verbose output might help see what buildpacks are being chosen to build
 your tool and their output:
 ```
-pack build my-cool-tool --verbose --builder toolforge-buster0-builder
+pack build my-cool-tool --verbose --builder toolforge-bullseye0-builder
 ```
 
 # License
